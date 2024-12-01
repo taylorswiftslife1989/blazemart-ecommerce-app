@@ -12,6 +12,7 @@ import {
   ImageBackground,
 } from "react-native";
 import { RadioButton } from "react-native-paper";
+import * as ImagePicker from "expo-image-picker";
 
 const SellProduct = ({ navigation }) => {
   const [photos, setPhotos] = useState([]);
@@ -21,10 +22,17 @@ const SellProduct = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
 
-  const handleAddPhoto = () => {
+  const handleAddPhoto = async () => {
     if (photos.length < 10) {
-      // Add photo logic here
-      setPhotos([...photos, "new_photo"]);
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        setPhotos([...photos, result.assets[0].uri]);
+      }
     } else {
       Alert.alert("Maximum 10 photos allowed");
     }
@@ -68,6 +76,13 @@ const SellProduct = ({ navigation }) => {
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.sectionHeader}>
+            <Image
+              source={require("./assets/sell/product_details.png")}
+              style={styles.sectionIcon}
+            />
+            <Text style={styles.sectionTitle}>Product Details</Text>
+          </View>
           {/* Add Photos Section */}
           <View style={styles.photosContainer}>
             <ScrollView horizontal>
@@ -91,7 +106,7 @@ const SellProduct = ({ navigation }) => {
                   onPress={handleAddPhoto}
                 >
                   <Image
-                    source={require("./assets/sell/add_more_photo.png")}
+                    source={require("./assets/sell/photo_add.png")}
                     style={styles.addPhotoIcon}
                   />
                 </TouchableOpacity>
@@ -101,13 +116,6 @@ const SellProduct = ({ navigation }) => {
 
           {/* Product Details Section */}
           <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Image
-                source={require("./assets/sell/product_details.png")}
-                style={styles.sectionIcon}
-              />
-              <Text style={styles.sectionTitle}>Product Details</Text>
-            </View>
             <TextInput placeholder="Product Name" style={styles.input} />
             <TextInput
               placeholder="Description"
@@ -127,11 +135,25 @@ const SellProduct = ({ navigation }) => {
               />
               <Text style={styles.radioLabel}>New</Text>
               <RadioButton
-                value="used"
-                status={condition === "used" ? "checked" : "unchecked"}
-                onPress={() => setCondition("used")}
+                value="used - like new"
+                status={
+                  condition === "used - like new" ? "checked" : "unchecked"
+                }
+                onPress={() => setCondition("used - like new")}
               />
-              <Text style={styles.radioLabel}>Used</Text>
+              <Text style={styles.radioLabel}>Used - Like New</Text>
+              <RadioButton
+                value="used - good"
+                status={condition === "used - good" ? "checked" : "unchecked"}
+                onPress={() => setCondition("used - good")}
+              />
+              <Text style={styles.radioLabel}>Used - Good</Text>
+              <RadioButton
+                value="used - fair"
+                status={condition === "used - fair" ? "checked" : "unchecked"}
+                onPress={() => setCondition("used - fair")}
+              />
+              <Text style={styles.radioLabel}>Used - Fair</Text>
             </View>
           </View>
 
@@ -255,8 +277,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   photoBox: {
-    width: 100,
-    height: 100,
+    width: 400,
+    height: 400,
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderColor: "#DDD",
@@ -269,8 +291,9 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   addPhotoIcon: {
-    width: 50,
-    height: 50,
+    width: 90,
+    height: 90,
+    borderRadius: 10,
   },
   removePhoto: {
     position: "absolute",
@@ -278,8 +301,8 @@ const styles = StyleSheet.create({
     right: 5,
   },
   removeIcon: {
-    width: 20,
-    height: 20,
+    width: 30,
+    height: 30,
   },
   section: {
     marginBottom: 20,
@@ -290,13 +313,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionIcon: {
-    width: 25,
-    height: 25,
+    width: 65,
+    height: 65,
     marginRight: 10,
+    borderRadius: 40,
   },
   sectionTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 20,
+    fontWeight: "800",
+    color: "#4E56A0",
   },
   input: {
     borderWidth: 1,
