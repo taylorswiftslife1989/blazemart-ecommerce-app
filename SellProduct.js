@@ -46,7 +46,13 @@ const SellProduct = ({ navigation }) => {
 
   const handleSubmit = () => {
     if (photos.length > 0 && contactNumber && email && category) {
-      navigation.navigate("Marketplace");
+      navigation.navigate("Marketplace", {
+        notification: {
+          title: "Success!",
+          description:
+            "Your product has been saved in our servers. Please wait for the approval, Thank you!",
+        },
+      });
     } else {
       Alert.alert("Please fill all the information");
     }
@@ -109,6 +115,7 @@ const SellProduct = ({ navigation }) => {
                     source={require("./assets/sell/photo_add.png")}
                     style={styles.addPhotoIcon}
                   />
+                  <Text style={styles.insertPhotoText}>Insert a Photo</Text>
                 </TouchableOpacity>
               )}
             </ScrollView>
@@ -172,14 +179,14 @@ const SellProduct = ({ navigation }) => {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Contact Information</Text>
             <TextInput
-              placeholder="Contact Number"
+              placeholder="Contact Number (Required)"
               style={styles.input}
               keyboardType="phone-pad"
               value={contactNumber}
               onChangeText={setContactNumber}
             />
             <TextInput
-              placeholder="Email Address"
+              placeholder="Email Address (Optional)"
               style={styles.input}
               keyboardType="email-address"
               value={email}
@@ -277,11 +284,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   photoBox: {
-    width: 400,
-    height: 400,
+    width: 393,
+    height: 395,
     backgroundColor: "#FFF",
-    borderWidth: 1,
-    borderColor: "#DDD",
+    borderWidth: 4,
+    borderColor: "#4E56A0",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 10,
@@ -293,7 +300,14 @@ const styles = StyleSheet.create({
   addPhotoIcon: {
     width: 90,
     height: 90,
-    borderRadius: 10,
+    borderRadius: 15,
+  },
+  insertPhotoText: {
+    color: "#4E56A0",
+    fontSize: 16,
+    fontWeight: "800",
+    marginTop: 10,
+    textAlign: "center",
   },
   removePhoto: {
     position: "absolute",
@@ -313,19 +327,18 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   sectionIcon: {
-    width: 65,
-    height: 65,
+    width: 25,
+    height: 25,
     marginRight: 10,
-    borderRadius: 40,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#4E56A0",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   input: {
-    borderWidth: 1,
-    borderColor: "#DDD",
+    borderWidth: 3,
+    backgroundColor: "#FFF",
+    borderColor: "#4E56A0",
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
