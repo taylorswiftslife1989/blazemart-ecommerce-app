@@ -12,9 +12,13 @@
     "@expo/metro-runtime": "~4.0.0",
     "@react-navigation/native": "^6.1.18",
     "@react-navigation/stack": "^6.4.1",
-    "expo": "^52.0.7",
+    "@supabase/supabase-js": "^2.46.2",
+    "expo": "^52.0.11",
+    "expo-document-picker": "^13.0.1",
     "expo-font": "~13.0.1",
+    "expo-image-picker": "^16.0.3",
     "expo-linear-gradient": "~14.0.1",
+    "expo-permissions": "^14.4.0",
     "expo-splash-screen": "~0.29.13",
     "expo-status-bar": "~2.0.0",
     "react": "18.3.1",
@@ -27,8 +31,8 @@
     "react-native-screens": "^4.1.0",
     "react-native-snackbar": "^2.8.0",
     "react-native-toast-message": "^2.2.1",
-    "react-native-web": "~0.19.10",
-    "expo-image-picker": "~16.0.3"
+    "react-native-web": "~0.19.10"
+    
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
