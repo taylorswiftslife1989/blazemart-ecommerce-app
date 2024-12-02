@@ -7,12 +7,11 @@ import {
   ImageBackground,
   Image,
   Animated,
-  View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ActivityIndicator } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { supabase } from "./supabase"; // Import Supabase client
+import { supabase } from "./supabase";
 
 export default function Login() {
   const navigation = useNavigation();
@@ -44,13 +43,11 @@ export default function Login() {
 
     try {
       const { data, error } = await supabase
-        .from("users") // Replace with your table name
+        .from("users")
         .select("*")
         .eq("username", username)
-        .eq("password", password); // Replace with the actual column names
+        .eq("password", password);
 
-        console.log("Data:", data);
-        console.log("Error:", error);
 
       if (error) {
         setErrorMessage("Error during authentication. Please try again.");
@@ -58,7 +55,7 @@ export default function Login() {
       } else if (data.length === 0) {
         setErrorMessage("Invalid username or password.");
       } else {
-        navigation.navigate("Home"); // Navigate to the dashboard
+        navigation.navigate("Home");
       }
     } catch (err) {
       console.error("Error:", err);
@@ -151,7 +148,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingHorizontal: 20,
-    marginTop: 30, // Moved up by 100 pixels from 200 to 100
+    marginTop: 30,
   },
   logo: {
     width: 200,
