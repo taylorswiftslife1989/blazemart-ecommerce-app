@@ -1,29 +1,34 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  ImageBackground,
   Alert,
-  Animated,
   SafeAreaView,
+  Animated,
+  ImageBackground,
+  Platform,
+  StatusBar,
 } from "react-native";
-import { StatusBar, Platform } from "react-native";
+import * as DocumentPicker from "expo-document-picker";
+import { supabase } from "./supabase"; // Import your configured Supabase client
 import { useNavigation } from "@react-navigation/native";
 
 export default function Register() {
   const navigation = useNavigation();
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [selectedGender, setSelectedGender] = useState(null);
-  const [idNumber, setIdNumber] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [address, setAddress] = useState("");
+  const [fadeAnim] = useState(new Animated.Value(0));
+  const [fullname, setFullname] = useState("");
   const [email, setEmail] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
+  const [studentId, setStudentId] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [corUri, setCorUri] = useState(null);
+  const [corName, setCorName] = useState(null); // To display file name
 
-  useEffect(() => {
+  // Fade-in effect
+  React.useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 1000,
@@ -32,47 +37,88 @@ export default function Register() {
   }, [fadeAnim]);
 
   const handleBackPress = () => {
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 500,
-      useNativeDriver: true,
-    }).start(() => {
-      navigation.navigate("Login");
-    });
+    navigation.navigate("Login"); // Replace "Login" with the name of your login screen
   };
 
-  const handleSignUp = () => {
-    // Email validation regex for specific domains
-    const emailRegex =
-      /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.com|ustp\.edu\.ph)$/;
+  const handleUploadCOR = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/pdf",
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
 
-    if (
-      !idNumber ||
-      !fullName ||
-      !selectedGender ||
-      !address ||
-      !email ||
-      !contactNumber
-    ) {
-      Alert.alert("Error", "All fields are required. Please fill them out.");
+      console.log("DocumentPicker result:", result);
+
+      if (result.canceled) {
+        Alert.alert("Cancelled", "You did not select any file.");
+      } else {
+        const fileUri = result.assets[0].uri;
+        const fileName = result.assets[0].name;
+        setCorUri(fileUri);
+        setCorName(fileName);
+        Alert.alert("File Selected", `COR file selected successfully:\n${fileName}`);
+      }
+    } catch (error) {
+      console.error("Error selecting file:", error);
+      Alert.alert("Error", "An unexpected error occurred during file selection.");
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (!fullname || !email || !studentId || !username || !password || !confirmPassword || !corUri) {
+      Alert.alert("Error", "All fields are required.");
       return;
     }
 
-    // Validate email address
-    if (!emailRegex.test(email)) {
-      Alert.alert("Error", "Must be a valid email address.");
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
       return;
     }
 
-    Alert.alert(
-      "Registration",
-      "Account Registration has been completed successfully",
-      [{ text: "OK", onPress: () => navigation.navigate("Login") }]
-    );
-  };
+    try {
+      // Upload COR to Supabase storage
+      const fileName = `${studentId}_cor.pdf`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("cor_bucket")
+        .upload(fileName, {
+          uri: corUri,
+          name: fileName,
+          type: "application/pdf",
+        });
 
-  const handleUploadCOR = () => {
-    Alert.alert("Upload COR", "COR uploaded successfully.");
+      if (uploadError) {
+        console.error("Error uploading COR:", uploadError);
+        Alert.alert("Error", "Failed to upload COR.");
+        return;
+      }
+
+      const corUrl = supabase.storage.from("cor_bucket").getPublicUrl(fileName).data.publicUrl;
+
+      // Insert user data into the database
+      const { data, error } = await supabase.from("users").insert([
+        {
+          fullname,
+          email,
+          student_id: studentId,
+          username,
+          password, // In production, use hashed passwords
+          cor_url: corUrl,
+        },
+      ]);
+
+      if (error) {
+        console.error("Error signing up:", error);
+        Alert.alert("Error", "Failed to register. Please try again.");
+      } else {
+        Alert.alert("Success", "Registration successful!", [
+          { text: "OK", onPress: () => navigation.navigate("Login") },
+        ]);
+      }
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      Alert.alert("Error", "An unexpected error occurred.");
+    }
   };
 
   return (
@@ -90,99 +136,88 @@ export default function Register() {
 
       <SafeAreaView style={styles.safeArea}>
         <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
-          <TouchableOpacity
-            style={[styles.backButton, { backgroundColor: "#4E56A0" }]}
-            onPress={handleBackPress}
-          >
-            <Text style={styles.backButtonText}>Back</Text>
-          </TouchableOpacity>
-
           <Text style={styles.title}>Registration Form</Text>
           <Text style={styles.subtitle}>Please fill in the details below:</Text>
-
-          <Text style={styles.label}>COR</Text>
-
-          <TouchableOpacity
-            style={[styles.uploadButton, { backgroundColor: "#4E56A0" }]}
-            onPress={handleUploadCOR}
-          >
-            <Text style={styles.uploadButtonText}>Upload COR</Text>
-          </TouchableOpacity>
-          <Text style={styles.label}>ID Number</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Required"
-            placeholderTextColor="#555"
-            value={idNumber}
-            onChangeText={setIdNumber}
-            keyboardType="numeric" // Ensures number pad for input
-          />
 
           <Text style={styles.label}>Full Name</Text>
           <TextInput
             style={styles.input}
             placeholder="Required"
             placeholderTextColor="#555"
-            value={fullName}
-            onChangeText={setFullName}
+            value={fullname}
+            onChangeText={setFullname}
           />
 
-          <Text style={styles.genderText}>Gender:</Text>
-          <View style={styles.genderContainer}>
-            <TouchableOpacity
-              style={[
-                styles.genderOption,
-                selectedGender === "Male" && styles.selectedGenderOption,
-              ]}
-              onPress={() => setSelectedGender("Male")}
-            >
-              <Text style={styles.genderOptionText}>Male</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[
-                styles.genderOption,
-                selectedGender === "Female" && styles.selectedGenderOption,
-              ]}
-              onPress={() => setSelectedGender("Female")}
-            >
-              <Text style={styles.genderOptionText}>Female</Text>
-            </TouchableOpacity>
-          </View>
-
-          <Text style={styles.label}>Address</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Required"
-            placeholderTextColor="#555"
-            value={address}
-            onChangeText={setAddress}
-          />
-
-          <Text style={styles.label}>Email Address</Text>
+          <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}
             placeholder="Required"
             placeholderTextColor="#555"
             value={email}
             onChangeText={setEmail}
+            keyboardType="email-address"
           />
 
-          <Text style={styles.label}>Contact Number</Text>
+          <Text style={styles.label}>Student ID</Text>
           <TextInput
             style={styles.input}
             placeholder="Required"
             placeholderTextColor="#555"
-            value={contactNumber}
-            onChangeText={setContactNumber}
-            keyboardType="numeric" // Ensures number pad for input
+            value={studentId}
+            onChangeText={setStudentId}
+            keyboardType="numeric"
           />
-          
+
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Required"
+            placeholderTextColor="#555"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Required"
+            placeholderTextColor="#555"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <Text style={styles.label}>Confirm Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Required"
+            placeholderTextColor="#555"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry
+          />
+
+          <Text style={styles.label}>COR (PDF)</Text>
+          <TouchableOpacity
+            style={[styles.uploadButton, { backgroundColor: "#4E56A0" }]}
+            onPress={handleUploadCOR}
+          >
+            <Text style={styles.uploadButtonText}>
+              {corName ? `Selected: ${corName}` : "Upload COR"}
+            </Text>
+          </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.signUpButton, { backgroundColor: "#4E56A0" }]}
             onPress={handleSignUp}
           >
             <Text style={styles.signUpButtonText}>SIGN UP</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={handleBackPress}>
+            <Text style={styles.loginPrompt}>
+              Already have an account? <Text style={styles.loginText}>Back to login.</Text>
+            </Text>
           </TouchableOpacity>
         </Animated.View>
       </SafeAreaView>
@@ -191,6 +226,7 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
+  // Reuse your original styles here
   background: {
     flex: 1,
     resizeMode: "cover",
@@ -201,7 +237,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "transparent", // Change from "rgba(0, 0, 0, 0.5)"
+    backgroundColor: "transparent",
   },
   safeArea: {
     flex: 1,
@@ -214,36 +250,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  backButton: {
-    position: "absolute",
-    width: "20%",
-    height: 45,
-    top: 25,
-    left: 55,
-    overflow: "hidden",
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  backButtonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: 800,
-    textAlign: "center",
-  },
   title: {
     color: "#000",
     fontSize: 25,
     fontWeight: "bold",
-    top: 20,
     textAlign: "center",
     marginBottom: 10,
   },
   subtitle: {
     color: "#000",
     fontSize: 15,
-    top: 8,
-    marginBottom: 10,
+    marginBottom: 20,
     textAlign: "center",
   },
   label: {
@@ -278,12 +295,12 @@ const styles = StyleSheet.create({
   },
   uploadButtonText: {
     color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "600",
   },
   signUpButton: {
-    width: "40%",
-    height: 55,
+    width: "75%",
+    height: 45,
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
@@ -291,40 +308,16 @@ const styles = StyleSheet.create({
   },
   signUpButtonText: {
     color: "#fff",
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 18,
+    fontWeight: "700",
   },
-  genderText: {
-    color: "#000",
-    fontSize: 16,
-    marginTop: 5,
-    left: 20,
-    textAlign: "left",
-    width: "80%",
-    alignSelf: "center",
+  loginPrompt: {
+    marginTop: 10,
+    fontSize: 15,
+    textAlign: "center",
   },
-  genderContainer: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
-    alignItems: "center",
-    marginVertical: 10,
-    width: "80%",
-  },
-  genderOption: {
-    width: 80,
-    height: 40,
-    borderWidth: 2,
-    borderRadius: 10,
-    borderColor: "#4E56A0",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  selectedGenderOption: {
-    color: "#fff",
-    backgroundColor: "#4E56A0",
-  },
-  genderOptionText: {
-    fontSize: 16,
-    color: "#000",
+  loginText: {
+    color: "#4E56A0",
+    fontWeight: "600",
   },
 });
