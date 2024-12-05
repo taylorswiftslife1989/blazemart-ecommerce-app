@@ -7,23 +7,25 @@ import {
   ImageBackground,
   Image,
   Animated,
-  View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { ActivityIndicator } from "react-native-paper";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
+import { supabase } from "./supabase";
 
 export default function Login() {
   const navigation = useNavigation();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const moveAnim = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    // Animation sequence: move to a slightly higher position, then fade in the rest
     Animated.sequence([
       Animated.timing(moveAnim, {
-        toValue: -150, // Adjusted to a smaller value for a moderate upward movement
+        toValue: -150,
         duration: 1000,
         useNativeDriver: true,
       }),
@@ -35,23 +37,37 @@ export default function Login() {
     ]).start();
   }, []);
 
-  const handleButtonPress = (navigateTo) => {
+  const handleLogin = async () => {
     setLoading(true);
-    setTimeout(() => {
+    setErrorMessage("");
+
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password);
+
+
+      if (error) {
+        setErrorMessage("Error during authentication. Please try again.");
+        console.error(error);
+      } else if (data.length === 0) {
+        setErrorMessage("Invalid username or password.");
+      } else {
+        navigation.navigate("Home");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      setErrorMessage("Something went wrong. Please try again.");
+    } finally {
       setLoading(false);
-      navigation.navigate(navigateTo);
-    }, 2000);
+    }
   };
 
   return (
-    <ImageBackground
-      source={require("./assets/background.jpg")}
-      style={styles.background}
-    >
-      {/* Header section with move animation */}
-      <Animated.View
-        style={[styles.container, { transform: [{ translateY: moveAnim }] }]}
-      >
+    <ImageBackground source={require("./assets/background.jpg")} style={styles.background}>
+      <Animated.View style={[styles.container, { transform: [{ translateY: moveAnim }] }]}>
         <Image source={require("./assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>BLAZEMART</Text>
         <Text style={styles.subtitle}>
@@ -59,23 +75,28 @@ export default function Login() {
         </Text>
       </Animated.View>
 
-      {/* Rest of elements with fade-in effect */}
       <Animated.View style={[styles.fadeContainer, { opacity: fadeAnim }]}>
         <TextInput
           style={styles.input}
           placeholder="Username"
           placeholderTextColor="#555"
+          value={username}
+          onChangeText={setUsername}
         />
         <TextInput
           style={styles.input}
           placeholder="Password"
           placeholderTextColor="#555"
           secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
+
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handleButtonPress("Home")}
+          onPress={handleLogin}
           disabled={loading}
         >
           <LinearGradient
@@ -88,10 +109,7 @@ export default function Login() {
           </LinearGradient>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={() => handleButtonPress("ForgotPass")}
-          disabled={loading}
-        >
+        <TouchableOpacity onPress={() => navigation.navigate("ForgotPass")} disabled={loading}>
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
@@ -99,24 +117,13 @@ export default function Login() {
           Don’t have an account?{" "}
           <Text
             style={styles.registerLink}
-            onPress={() => handleButtonPress("Register")}
+            onPress={() => navigation.navigate("Register")}
           >
             {"\n"}Create your Account here
           </Text>
         </Text>
-
-        <TouchableOpacity
-          style={styles.adminButton}
-          onPress={() => handleButtonPress("Admin_Login")} // Matches the route name in the navigator
-        >
-          <Image
-            source={require("./assets/admin_icon.png")}
-            style={styles.adminIcon}
-          />
-        </TouchableOpacity>
       </Animated.View>
 
-      {/* Loading Overlay */}
       {loading && (
         <Animated.View style={[styles.loadingOverlay, { opacity: fadeAnim }]}>
           <ActivityIndicator size="100" color="#fff" />
@@ -141,7 +148,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     paddingHorizontal: 20,
-    marginTop: 30, // Moved up by 100 pixels from 200 to 100
+    marginTop: 30,
   },
   logo: {
     width: 200,
