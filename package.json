@@ -32,7 +32,6 @@
     "react-native-snackbar": "^2.8.0",
     "react-native-toast-message": "^2.2.1",
     "react-native-web": "~0.19.10"
-    
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
