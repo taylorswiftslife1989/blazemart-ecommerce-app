@@ -22,6 +22,8 @@ import MySavedPage from "./MySavedPage";
 import Marketplace from "./Marketplace";
 import MessagePage from "./MessagePage";
 import SellProduct from "./SellProduct";
+import CategoryPage from "./CategoryPage";
+import Notification from "./Notification";
 
 const Stack = createStackNavigator();
 
@@ -86,6 +88,8 @@ export default function App() {
         <Stack.Screen name="MySavedPage" component={MySavedPage} />
         <Stack.Screen name="MessagePage" component={MessagePage} />
         <Stack.Screen name="SellProduct" component={SellProduct} />
+        <Stack.Screen name="CategoryPage" component={CategoryPage} />
+        <Stack.Screen name="Notification" component={Notification} />
       </Stack.Navigator>
     </NavigationContainer>
   );

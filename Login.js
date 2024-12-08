@@ -48,7 +48,6 @@ export default function Login() {
         .eq("username", username)
         .eq("password", password);
 
-
       if (error) {
         setErrorMessage("Error during authentication. Please try again.");
         console.error(error);
@@ -66,8 +65,13 @@ export default function Login() {
   };
 
   return (
-    <ImageBackground source={require("./assets/background.jpg")} style={styles.background}>
-      <Animated.View style={[styles.container, { transform: [{ translateY: moveAnim }] }]}>
+    <ImageBackground
+      source={require("./assets/background.jpg")}
+      style={styles.background}
+    >
+      <Animated.View
+        style={[styles.container, { transform: [{ translateY: moveAnim }] }]}
+      >
         <Image source={require("./assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>BLAZEMART</Text>
         <Text style={styles.subtitle}>
@@ -92,12 +96,13 @@ export default function Login() {
           onChangeText={setPassword}
         />
 
-        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
 
         <TouchableOpacity
           style={styles.button}
-          onPress={handleLogin}
-          disabled={loading}
+          onPress={() => navigation.navigate("Home")}
         >
           <LinearGradient
             colors={["#4E56A0", "#252A55"]}
@@ -109,7 +114,10 @@ export default function Login() {
           </LinearGradient>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("ForgotPass")} disabled={loading}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ForgotPass")}
+          disabled={loading}
+        >
           <Text style={styles.forgotPassword}>Forgot Password?</Text>
         </TouchableOpacity>
 
