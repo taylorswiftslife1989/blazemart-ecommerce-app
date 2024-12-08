@@ -206,20 +206,28 @@ export default function Marketplace() {
         animationType="slide"
         onRequestClose={() => setCategoryModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select a Product Category</Text>
-            <ScrollView>
-              {categories.map((category) => (
-                <TouchableOpacity
-                  key={category}
-                  style={styles.radioItem}
-                  onPress={() => handleCategorySelect(category)}
-                >
-                  <Text style={styles.radioLabel}>{category}</Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
+        <View style={styles.modalOuterContainer}>
+          <View style={styles.modalInnerContainer}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setCategoryModalVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>X</Text>
+            </TouchableOpacity>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Select a Product Category</Text>
+              <ScrollView>
+                {categories.map((category) => (
+                  <TouchableOpacity
+                    key={category}
+                    style={styles.radioItem}
+                    onPress={() => handleCategorySelect(category)}
+                  >
+                    <Text style={styles.radioLabel}>{category}</Text>
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
           </View>
         </View>
       </Modal>
@@ -411,20 +419,44 @@ const styles = StyleSheet.create({
     height: 30,
     resizeMode: "contain",
   },
-  modalContainer: {
+  modalOuterContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0,0,0,0.5)",
+    padding: 10, // Add padding to create the border effect
+  },
+  modalInnerContainer: {
+    width: "90%",
+    backgroundColor: "#4E56A0",
+    borderRadius: 10,
+    padding: 10,
+    position: "relative",
+  },
+  closeButton: {
+    position: "absolute",
+    top: 20,
+    right: 18,
+    zIndex: 1,
+    backgroundColor: "#4E56A0",
+    padding: 3,
+    paddingHorizontal: 10,
+    borderRadius: 40,
+  },
+  closeButtonText: {
+    color: "#FFF",
+    fontSize: 15,
+    fontWeight: "bold",
   },
   modalContent: {
-    width: "80%",
-    backgroundColor: "#FFF",
+    width: "100%",
+    backgroundColor: "#cccccc",
     borderRadius: 10,
-    padding: 20,
+    padding: 10,
   },
   modalTitle: {
     fontSize: 18,
+    color: "#4E56A0",
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
@@ -433,9 +465,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 10,
+    paddingHorizontal: 30,
   },
   radioLabel: {
     marginLeft: 10,
-    fontSize: 16,
+    fontSize: 17,
+    fontWeight: "bold",
+    color: "#4E56A0",
   },
 });

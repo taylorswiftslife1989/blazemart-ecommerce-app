@@ -84,7 +84,7 @@ export default function VerifyPass() {
       <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
         <TouchableOpacity style={styles.backButton} onPress={handleBackPress}>
           <LinearGradient
-            colors={["#D66464", "#703434"]}
+            colors={["#6671d1", "#313666"]}
             style={styles.backButtonGradient}
           >
             <Text style={styles.backButtonText}>Back</Text>
@@ -117,7 +117,7 @@ export default function VerifyPass() {
           onPress={handleSubmitPress}
         >
           <LinearGradient
-            colors={["#D66464", "#703434"]}
+            colors={["#6671d1", "#313666"]}
             style={styles.submitButtonGradient}
           >
             <Text style={styles.submitButtonText}>Submit</Text>
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
     top: 40,
     left: 20,
     borderWidth: 3,
-    borderColor: "#F2A4A4",
+    borderColor: "#a1bfec",
     borderRadius: 25,
     overflow: "hidden",
   },
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     overflow: "hidden",
     marginVertical: 20,
-    borderColor: "#F2A4A4",
+    borderColor: "#a1bfec",
     borderWidth: 3,
   },
   submitButtonGradient: {

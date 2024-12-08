@@ -70,7 +70,7 @@ export default function ForgotPass() {
           onPress={handleBackPress} // Use the new handler here
         >
           <LinearGradient
-            colors={["#D66464", "#703434"]}
+            colors={["#6671d1", "#313666"]}
             style={styles.backButtonGradient}
           >
             <Text style={styles.backButtonText}>Back</Text>
@@ -90,7 +90,7 @@ export default function ForgotPass() {
 
         <TouchableOpacity style={styles.nextButton} onPress={handleNextPress}>
           <LinearGradient
-            colors={["#D66464", "#703434"]}
+            colors={["#6671d1", "#313666"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={styles.nextButtonGradient}
@@ -128,16 +128,16 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 40,
-    left: 20,
+    top: 60,
+    left: 25,
     borderWidth: 3,
-    borderColor: "#F2A4A4",
-    borderRadius: 25,
+    borderColor: "#a1bfec",
+    borderRadius: 10,
     overflow: "hidden",
   },
   backButtonGradient: {
     padding: 10,
-    borderRadius: 25,
+    borderRadius: 10,
   },
   backButtonText: {
     color: "#fff",
@@ -162,21 +162,21 @@ const styles = StyleSheet.create({
     width: "80%",
     height: 50,
     backgroundColor: "#ddd",
-    borderRadius: 25,
+    borderRadius: 10,
     paddingHorizontal: 15,
     fontSize: 16,
     marginVertical: 10,
     textAlign: "center",
-    borderColor: "#F2A4A4",
+    borderColor: "#4E56A0",
     borderWidth: 3,
   },
   nextButton: {
     width: "80%",
     height: 50,
-    borderRadius: 25,
+    borderRadius: 10,
     overflow: "hidden",
     marginVertical: 20,
-    borderColor: "#F2A4A4",
+    borderColor: "#a1bfec",
     borderWidth: 3,
   },
   nextButtonGradient: {

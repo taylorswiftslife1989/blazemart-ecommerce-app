@@ -20,6 +20,7 @@ const SellProduct = ({ navigation }) => {
   const [category, setCategory] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [price, setPrice] = useState("");
   const [isCategoryModalVisible, setCategoryModalVisible] = useState(false);
 
   const handleAddPhoto = async () => {
@@ -54,6 +55,15 @@ const SellProduct = ({ navigation }) => {
     } else {
       Alert.alert("Notice", "Please fill out all required information!");
     }
+  };
+
+  const formatPrice = (value) => {
+    const number = value.replace(/[^0-9]/g, "");
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
+  const handlePriceChange = (value) => {
+    setPrice(`₱${formatPrice(value)}`);
   };
 
   return (
@@ -131,6 +141,13 @@ const SellProduct = ({ navigation }) => {
               placeholder="Description"
               style={styles.input}
               multiline
+            />
+            <TextInput
+              placeholder="Price"
+              style={styles.input}
+              keyboardType="numeric"
+              value={price}
+              onChangeText={handlePriceChange}
             />
           </View>
 

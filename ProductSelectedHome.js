@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import {
   SafeAreaView,
   View,
@@ -12,15 +12,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
-export default function Home() {
+export default function ProductSelectedHome() {
   const navigation = useNavigation();
-  const [loading, setLoading] = useState(false);
-
-  const productItems = Array.from({ length: 10 }, (_, i) => ({
-    id: i,
-    title: `Product ${i + 1}`,
-    price: `₱${(i + 1) * 100}`,
-  }));
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -64,84 +57,32 @@ export default function Home() {
             </View>
           </View>
 
-          {/* Sections */}
-          <View style={styles.scrollViewContent}>
-            {/* Featured Section */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeader}>
-                <Image
-                  source={require("./assets/home/featured.png")}
-                  style={styles.sectionIcon}
-                />
-                <Text style={styles.sectionTitle}>Featured</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContainer}
-              >
-                {productItems.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={styles.productContainer}
-                    onPress={() =>
-                      navigation.navigate("ProductSelectedHome", {
-                        product: item,
-                      })
-                    }
-                  >
-                    <Image
-                      source={require("./assets/home/product.png")}
-                      style={styles.productImage}
-                    />
-                    <Text style={styles.productTitle}>{item.title}</Text>
-                    <Text style={styles.productPrice}>{item.price}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+          {/* Product Details Section */}
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <View style={styles.imageContainer}>
+              <Image
+                source={require("./assets/home/product.png")}
+                style={styles.productImage}
+              />
             </View>
-
-            {/* Recently Viewed Section */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeader}>
-                <Image
-                  source={require("./assets/home/recent.png")}
-                  style={styles.sectionIcon}
-                />
-                <Text style={styles.sectionTitle}>Recently Viewed</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.scrollContainer}
-              >
-                {productItems.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={styles.productContainer}
-                    onPress={() =>
-                      navigation.navigate("ProductSelectedHome", {
-                        product: item,
-                      })
-                    }
-                  >
-                    <Image
-                      source={require("./assets/home/product.png")}
-                      style={styles.productImage}
-                    />
-                    <Text style={styles.productTitle}>{item.title}</Text>
-                    <Text style={styles.productPrice}>{item.price}</Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
+            <View style={styles.productDetailsContainer}>
+              <Text style={styles.productTitle}>Product Title</Text>
+              <Text style={styles.productPrice}>₱1,000</Text>
+              <Text style={styles.productDescription}>
+                This is a detailed description of the product. It includes all
+                the necessary information about the product.
+              </Text>
             </View>
-          </View>
+          </ScrollView>
         </ImageBackground>
       </View>
 
       {/* Bottom Navigation */}
       <View style={styles.bottomNavigation}>
-        <TouchableOpacity style={styles.home_navCircle}>
+        <TouchableOpacity
+          style={styles.home_navCircle}
+          onPress={() => navigation.navigate("Home")}
+        >
           <Image
             source={require("./assets/navigation/home.png")}
             style={styles.icon}
@@ -233,65 +174,49 @@ const styles = StyleSheet.create({
     backgroundColor: "#4E56A0",
     borderRadius: 30,
   },
-  message_topIcon: {
-    width: 45,
-    height: 45,
-    marginLeft: 10,
-    resizeMode: "contain",
-    borderRadius: 25,
-  },
   scrollViewContent: {
     paddingBottom: 90, // To avoid overlap with bottom navigation
   },
-  sectionContainer: {
-    marginVertical: 15,
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 25,
-  },
-  sectionIcon: {
-    width: 45, // Increased width to accommodate padding
-    height: 45, // Increased height to accommodate padding
-    margin: 10,
-    marginRight: 5,
-    backgroundColor: "#201b51",
-    borderRadius: 10, // Adjusted border radius for a perfect circle
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "800",
-    color: "#201B51",
-  },
-  scrollContainer: {
-    paddingLeft: 30, // Add padding to the left
-    paddingRight: 30, // Add padding to the right
-  },
-  productContainer: {
-    flex: 1,
-    margin: 5,
+  productDetailsContainer: {
+    marginTop: 150, // Adjust to position below the image container
+    marginHorizontal: 20,
     backgroundColor: "#FFF",
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
     alignItems: "center",
-    width: 170,
+  },
+  imageContainer: {
+    width: "100%",
+    aspectRatio: 1,
+    overflow: "hidden",
+    borderRadius: 10,
+    marginBottom: -150, // Adjust to overlap the white box
+    zIndex: 1,
   },
   productImage: {
     width: "100%",
-    height: 150,
-    borderRadius: 10,
+    height: "100%",
+    resizeMode: "cover",
   },
   productTitle: {
-    marginTop: 5,
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: "bold",
     color: "#4E56A0",
+    textAlign: "left",
+    alignSelf: "flex-start",
+    marginBottom: 10,
   },
   productPrice: {
-    marginTop: 5,
-    fontSize: 14,
+    fontSize: 20,
     color: "#4E56A0",
+    textAlign: "left",
+    alignSelf: "flex-start",
+    marginBottom: 20,
+  },
+  productDescription: {
+    fontSize: 16,
+    color: "#4E56A0",
+    textAlign: "center",
   },
   bottomNavigation: {
     height: 95,
