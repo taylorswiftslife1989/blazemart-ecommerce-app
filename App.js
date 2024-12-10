@@ -25,6 +25,7 @@ import SellProduct from "./SellProduct";
 import CategoryPage from "./CategoryPage";
 import Notification from "./Notification";
 import ProductSelectedHome from "./ProductSelectedHome";
+import MyProfile from "./MyProfile";
 
 const Stack = createStackNavigator();
 
@@ -95,6 +96,7 @@ export default function App() {
           name="ProductSelectedHome"
           component={ProductSelectedHome}
         />
+        <Stack.Screen name="MyProfile" component={MyProfile} />
       </Stack.Navigator>
     </NavigationContainer>
   );

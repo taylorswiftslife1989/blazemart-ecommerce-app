@@ -85,7 +85,10 @@ export default function ProfilePage() {
           {/* Action Buttons */}
           <View style={styles.actionContainer}>
             <View style={styles.background_for_actionContainer}>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate("MyProfile")}
+              >
                 <View style={styles.iconContainer}>
                   <Image
                     source={require("./assets/profile/profile_icon.png")}
@@ -94,7 +97,10 @@ export default function ProfilePage() {
                 </View>
                 <Text style={styles.actionText}>View Profile</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate("Notification")}
+              >
                 <View style={styles.iconContainer}>
                   <Image
                     source={require("./assets/profile/edit_profile.png")}
@@ -103,7 +109,10 @@ export default function ProfilePage() {
                 </View>
                 <Text style={styles.actionText}>Edit Profile</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionButton}>
+              <TouchableOpacity
+                style={styles.actionButton}
+                onPress={() => navigation.navigate("Notification")}
+              >
                 <View style={styles.iconContainer}>
                   <Image
                     source={require("./assets/profile/setting.png")}
@@ -179,7 +188,10 @@ export default function ProfilePage() {
             style={styles.icon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navCircle}>
+        <TouchableOpacity
+          style={styles.navCircle}
+          onPress={() => navigation.navigate("Notification")}
+        >
           <Image
             source={require("./assets/navigation/notifications.png")}
             style={styles.icon}
