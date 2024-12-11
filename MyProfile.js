@@ -1,44 +1,138 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
 import {
   SafeAreaView,
+  SectionList,
   View,
   Text,
   StyleSheet,
   Image,
   ImageBackground,
   TouchableOpacity,
-  FlatList,
   Dimensions,
+  FlatList,
+  TextInput,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 
 export default function MyProfile() {
   const navigation = useNavigation();
+  const route = useRoute();
   const [loading, setLoading] = useState(false);
 
-  const productItems = Array.from({ length: 20 }, (_, i) => ({
-    id: i.toString(),
-    title: `Product ${i + 1}`,
-    price: `₱${(i + 1) * 100}`,
-    image: require("./assets/home/product.png"), // Replace with actual images
-  }));
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productContainer}
-      onPress={() =>
-        navigation.navigate("ProductSelectedHome", {
-          product: item,
-        })
-      }
-    >
-      <Image source={item.image} style={styles.productImage} />
-      <Text style={styles.productTitle}>{item.title}</Text>
-      <Text style={styles.productPrice}>{item.price}</Text>
-    </TouchableOpacity>
+  const [profileImage, setProfileImage] = useState(
+    require("./assets/profile_icon.png")
   );
+  const [fullName, setFullName] = useState("First Name Last Name");
+  const [email, setEmail] = useState("example123@domain.com");
+  const [contactNumber, setContactNumber] = useState("09123456789");
+
+  useEffect(() => {
+    if (route.params) {
+      const { profileImage, fullName, email, contactNumber } = route.params;
+      if (profileImage) setProfileImage(profileImage);
+      if (fullName) setFullName(fullName);
+      if (email) setEmail(email);
+      if (contactNumber) setContactNumber(contactNumber);
+    }
+  }, [route.params]);
+
+  const productItems = useMemo(
+    () =>
+      Array.from({ length: 20 }, (_, i) => ({
+        id: i.toString(),
+        title: `Product ${i + 1}`,
+        price: `₱${(i + 1) * 100}`,
+        image: require("./assets/home/product.png"),
+      })),
+    []
+  );
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <TouchableOpacity
+        style={styles.productContainer}
+        onPress={() =>
+          navigation.navigate("ProductSelectedHome", {
+            product: item,
+          })
+        }
+      >
+        <Image source={item.image} style={styles.productImage} />
+        <Text style={styles.productTitle}>{item.title}</Text>
+        <Text style={styles.productPrice}>{item.price}</Text>
+      </TouchableOpacity>
+    ),
+    [navigation]
+  );
+
+  const sections = [
+    {
+      title: "Profile",
+      data: [
+        <View style={styles.profileContainer} key="profile">
+          <ImageBackground
+            source={require("./assets/profile/profile_cover.jpg")}
+            style={styles.profileBox}
+          >
+            <Image source={profileImage} style={styles.profileImage} />
+          </ImageBackground>
+          <View style={styles.profileNameContainer}>
+            <Text style={styles.profileName}>{fullName}</Text>
+            <TouchableOpacity
+              style={styles.editButton}
+              onPress={() => navigation.navigate("EditProfile")}
+            >
+              <Image
+                source={require("./assets/edit.png")}
+                style={styles.editIcon}
+              />
+            </TouchableOpacity>
+          </View>
+          <Text style={styles.profileDescription}>Trailblazer</Text>
+        </View>,
+      ],
+    },
+    {
+      data: [
+        <View style={styles.bioContainer} key="bio">
+          <View style={styles.sectionHeader}>
+            <Image
+              source={require("./assets/bio_icon.png")}
+              style={styles.sectionIcon2}
+            />
+            <Text style={styles.sectionTitle}>Bio</Text>
+          </View>
+          <View style={styles.bioItem}>
+            <Image
+              source={require("./assets/verified.png")}
+              style={styles.bioIcon}
+            />
+            <Text style={styles.bioText}>Verified Trailblazer</Text>
+          </View>
+          <View style={styles.bioItem}>
+            <Image
+              source={require("./assets/phone.png")}
+              style={styles.bioIcon}
+            />
+            <Text style={styles.bioText}>{contactNumber}</Text>
+          </View>
+          <View style={styles.bioItem}>
+            <Image
+              source={require("./assets/email.png")}
+              style={styles.bioIcon}
+            />
+            <Text style={styles.bioText}>{email}</Text>
+          </View>
+        </View>,
+      ],
+    },
+    {
+      title: "Listings",
+      data: productItems,
+    },
+  ];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -55,77 +149,61 @@ export default function MyProfile() {
                 style={styles.navIcon}
               />
             </TouchableOpacity>
-            <Text style={styles.navTitle}>My Profile</Text>
+            <Text style={styles.navTitle}>Profile</Text>
           </View>
 
-          {/* Profile Section */}
-          <View style={styles.profileContainer}>
-            <ImageBackground
-              source={require("./assets/profile/profile_cover.jpg")}
-              style={styles.profileBox}
-            >
-              <Image
-                source={require("./assets/profile_icon.png")}
-                style={styles.profileImage}
-              />
-            </ImageBackground>
-            <Text style={styles.profileName}>First Name{"\n"}Last Name</Text>
-            <Text style={styles.profileDescription}>Trailblazer</Text>
-          </View>
-
-          {/* Sections */}
-          <View style={styles.scrollViewContent}>
-            {/* Bio Section */}
-            <View style={styles.bioContainer}>
-              <View style={styles.sectionHeader}>
-                <Image
-                  source={require("./assets/bio_icon.png")}
-                  style={styles.sectionIcon2}
-                />
-                <Text style={styles.sectionTitle}>Bio</Text>
-              </View>
-              <View style={styles.bioItem}>
-                <Image
-                  source={require("./assets/verified.png")}
-                  style={styles.bioIcon}
-                />
-                <Text style={styles.bioText}>Verified Trailblazer</Text>
-              </View>
-              <View style={styles.bioItem}>
-                <Image
-                  source={require("./assets/phone.png")}
-                  style={styles.bioIcon}
-                />
-                <Text style={styles.bioText}>09123456789</Text>
-              </View>
-              <View style={styles.bioItem}>
-                <Image
-                  source={require("./assets/email.png")}
-                  style={styles.bioIcon}
-                />
-                <Text style={styles.bioText}>example123@domain.com</Text>
-              </View>
-            </View>
-
-            {/* My Listings Section */}
-            <View style={styles.sectionContainer}>
-              <View style={styles.sectionHeader}>
-                <Image
-                  source={require("./assets/listing.png")}
-                  style={styles.sectionIcon}
-                />
-                <Text style={styles.sectionTitle}>My Listings</Text>
-              </View>
-              <FlatList
-                data={productItems}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id}
-                numColumns={2}
-                contentContainerStyle={styles.productList}
-              />
-              <View style={styles.divider} />
-            </View>
-          </View>
+          <SectionList
+            sections={sections}
+            keyExtractor={(item, index) => item.id || index.toString()}
+            renderItem={({ item, section }) =>
+              section.title === "Listings" ? (
+                <View style={styles.productsMainContainer}>
+                  <FlatList
+                    data={productItems}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    numColumns={2}
+                    columnWrapperStyle={styles.productList}
+                    contentContainerStyle={styles.flatListContent}
+                  />
+                </View>
+              ) : (
+                item
+              )
+            }
+            renderSectionHeader={({ section: { title } }) =>
+              title !== "Profile" && (
+                <View style={styles.sectionContainer}>
+                  {title === "Listings" && (
+                    <View>
+                      <View style={styles.sectionHeader}>
+                        <Image
+                          source={require("./assets/listing.png")}
+                          style={styles.sectionIcon2}
+                        />
+                        <Text style={styles.sectionTitle}>{title}</Text>
+                      </View>
+                      <View style={styles.searchBarContainer}>
+                        <Image
+                          source={require("./assets/search_listing.png")}
+                          style={styles.searchIcon}
+                        />
+                        <TextInput
+                          style={styles.searchBar}
+                          placeholder="Search Products..."
+                          placeholderTextColor="#888"
+                        />
+                      </View>
+                    </View>
+                  )}
+                  {title !== "Listings" && (
+                    <Text style={styles.sectionTitle}>{title}</Text>
+                  )}
+                </View>
+              )
+            }
+            contentContainerStyle={styles.scrollViewContent}
+          />
         </ImageBackground>
       </View>
 
@@ -175,7 +253,7 @@ export default function MyProfile() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#7190BF", // Bottom portion color
+    backgroundColor: "#7190BF",
   },
   backgroundContainer: {
     flex: 1,
@@ -202,7 +280,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     position: "absolute",
-    left: 150,
+    left: 183,
     right: 140,
     transform: [{ translateY: 20 }],
   },
@@ -228,13 +306,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  profileNameContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 55,
+    paddingHorizontal: 63,
+    alignSelf: "flex-start",
+  },
   profileName: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#4e56a0",
-    marginTop: 55,
-    paddingHorizontal: 63,
-    alignSelf: "flex-start",
+  },
+  editButton: {
+    marginLeft: 10,
+    borderRadius: 30,
+    padding: 5,
+  },
+  editIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 30,
   },
   profileDescription: {
     fontSize: 15,
@@ -244,7 +336,7 @@ const styles = StyleSheet.create({
     color: "#4e56a0",
   },
   scrollViewContent: {
-    paddingBottom: 90, // To avoid overlap with bottom navigation
+    paddingBottom: 90,
   },
   bioContainer: {
     backgroundColor: "#FFF",
@@ -273,23 +365,23 @@ const styles = StyleSheet.create({
     marginLeft: 25,
   },
   sectionIcon: {
-    width: 60, // Increased width to accommodate padding
-    height: 60, // Increased height to accommodate padding
+    width: 60,
+    height: 60,
     margin: 10,
     marginRight: 20,
     left: 10,
     backgroundColor: "#201b51",
-    borderRadius: 40, // Adjusted border radius for a perfect circle
+    borderRadius: 40,
     borderColor: "#CDC684",
     borderWidth: 4,
   },
   sectionIcon2: {
-    width: 60, // Increased width to accommodate padding
-    height: 60, // Increased height to accommodate padding
+    width: 60,
+    height: 60,
     margin: 10,
     marginRight: 5,
     backgroundColor: "#201b51",
-    borderRadius: 40, // Adjusted border radius for a perfect circle
+    borderRadius: 40,
     borderColor: "#CDC684",
     borderWidth: 4,
     right: 10,
@@ -298,6 +390,26 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "800",
     color: "#201B51",
+  },
+  searchBarContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    marginHorizontal: 35,
+    marginVertical: 10,
+    paddingHorizontal: 10,
+  },
+  searchIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 30,
+    marginRight: 10,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
   },
   bioText: {
     fontSize: 16,
@@ -309,19 +421,25 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 25,
   },
+  productsMainContainer: {
+    paddingHorizontal: 30,
+  },
   productContainer: {
     flex: 1,
-    margin: 5,
+    marginHorizontal: 5,
+    marginVertical: 5,
     backgroundColor: "#FFF",
+    paddingHorizontal: 15,
+    paddingTop: 10,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    width: (width - 40) / 2, // Adjust width to be half of the screen width minus margins
-    height: (width - 40) / 2, // Make the height equal to the width for a square container
+    width: (width - 40) / 2,
+    height: 210,
   },
   productImage: {
     width: "100%",
-    height: "70%", // Adjust height to fit within the container
+    height: "70%",
     borderRadius: 10,
   },
   productTitle: {
@@ -336,8 +454,10 @@ const styles = StyleSheet.create({
     color: "#4E56A0",
   },
   productList: {
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  flatListContent: {
+    paddingHorizontal: 10,
   },
   bottomNavigation: {
     height: 95,

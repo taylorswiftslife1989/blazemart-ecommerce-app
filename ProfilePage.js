@@ -99,7 +99,7 @@ export default function ProfilePage() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={() => navigation.navigate("Notification")}
+                onPress={() => navigation.navigate("EditProfile")}
               >
                 <View style={styles.iconContainer}>
                   <Image
