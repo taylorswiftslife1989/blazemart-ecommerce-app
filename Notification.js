@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -9,22 +9,98 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  ScrollView,
+  Modal,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 
 export default function Notification() {
   const navigation = useNavigation();
-
-  const notifications = [
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [notifications, setNotifications] = useState([
     { id: "1", text: "Your order has been shipped." },
     { id: "2", text: "Your item has been delivered." },
     { id: "3", text: "New message from seller." },
+    { id: "4", text: "Your order has been shipped." },
+    { id: "5", text: "Your item has been delivered." },
+    { id: "6", text: "New message from seller." },
+    { id: "7", text: "Your order has been shipped." },
+    { id: "8", text: "Your item has been delivered." },
+    { id: "9", text: "New message from seller." },
     // Add more notifications as needed
-  ];
+  ]);
+
+  const handleOptionPress = (notification) => {
+    setSelectedNotification(notification);
+    setModalVisible(true);
+  };
+
+  const handleMarkAsRead = () => {
+    setModalVisible(false);
+    Alert.alert("Notification", "Mark as read successfully");
+  };
+
+  const handleTurnOffNotification = () => {
+    Alert.alert(
+      "Turn off Notification",
+      "Would you like to turn off this notification?",
+      [
+        {
+          text: "No",
+          onPress: () => setModalVisible(false),
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => {
+            setModalVisible(false);
+            Alert.alert("Notification", "This notification has been muted");
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDeleteNotification = () => {
+    Alert.alert(
+      "Delete Notification",
+      "Would you like to delete this notification?",
+      [
+        {
+          text: "No",
+          onPress: () => setModalVisible(false),
+          style: "cancel",
+        },
+        {
+          text: "Yes",
+          onPress: () => {
+            setNotifications((prevNotifications) =>
+              prevNotifications.filter(
+                (notification) => notification.id !== selectedNotification.id
+              )
+            );
+            setModalVisible(false);
+            Alert.alert(
+              "Notification",
+              "Notification has been deleted successfully"
+            );
+          },
+        },
+      ]
+    );
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.notificationContainer}>
       <Text style={styles.notificationText}>{item.text}</Text>
+      <TouchableOpacity onPress={() => handleOptionPress(item)}>
+        <Image
+          source={require("./assets/option.png")}
+          style={styles.optionIcon}
+        />
+      </TouchableOpacity>
     </View>
   );
 
@@ -81,7 +157,7 @@ export default function Notification() {
               </View>
               <Text style={styles.title}>Notifications</Text>
             </View>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("MyProfile")}>
               <View style={styles.profileContainer}>
                 <Image
                   source={require("./assets/marketplace/profile_icon.png")}
@@ -91,13 +167,18 @@ export default function Notification() {
             </TouchableOpacity>
           </View>
 
-          {/* Notification List */}
-          <FlatList
-            data={notifications}
-            renderItem={renderItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.notificationList}
-          />
+          {/* Main Notification Container */}
+          <ScrollView contentContainerStyle={styles.scrollViewContent}>
+            <View style={styles.mainNotificationContainer}>
+              {/* Notification List */}
+              <FlatList
+                data={notifications}
+                renderItem={renderItem}
+                keyExtractor={(item) => item.id}
+                contentContainerStyle={styles.notificationList}
+              />
+            </View>
+          </ScrollView>
 
           {/* Bottom Navigation */}
           <View style={styles.bottomNavigation}>
@@ -137,6 +218,45 @@ export default function Notification() {
           </View>
         </ImageBackground>
       </View>
+
+      {/* Modal for Options */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={handleMarkAsRead}
+            >
+              <Text style={styles.modalOptionText}>Mark as Read</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={handleTurnOffNotification}
+            >
+              <Text style={styles.modalOptionText}>
+                Turn off this Notification
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={handleDeleteNotification}
+            >
+              <Text style={styles.modalOptionText}>Delete Notification</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.modalOption}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalOptionText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -152,6 +272,9 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     resizeMode: "cover",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
   },
   topContainer: {
     flexDirection: "row",
@@ -208,6 +331,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 30,
+    marginBottom: 20,
+    paddingBottom: 30,
     paddingVertical: 10,
     top: 40,
   },
@@ -242,6 +367,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
+  mainNotificationContainer: {
+    flex: 1,
+  },
   notificationList: {
     paddingHorizontal: 30,
     paddingVertical: 20,
@@ -251,12 +379,18 @@ const styles = StyleSheet.create({
     margin: 5,
     backgroundColor: "#FFF",
     borderRadius: 10,
-    padding: 10,
+    padding: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
   },
   notificationText: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  optionIcon: {
+    width: 20,
+    height: 20,
   },
   bottomNavigation: {
     height: 90,
@@ -288,5 +422,28 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     resizeMode: "contain",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    width: 300,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 20,
+    alignItems: "center",
+  },
+  modalOption: {
+    paddingVertical: 10,
+    width: "100%",
+    alignItems: "center",
+  },
+  modalOptionText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#4E56A0",
   },
 });
