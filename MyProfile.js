@@ -13,6 +13,9 @@ import {
   TextInput,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -24,11 +27,24 @@ export default function MyProfile() {
   const [profileImage, setProfileImage] = useState(
     require("./assets/profile_icon.png")
   );
-  const [fullName, setFullName] = useState("First Name Last Name");
+  const [fullName, setFullName] = useState("Full Name");
   const [email, setEmail] = useState("example123@domain.com");
   const [contactNumber, setContactNumber] = useState("09123456789");
 
   useEffect(() => {
+    const loadProfileImage = async () => {
+      try {
+        const savedImageUri = await AsyncStorage.getItem("profileImage");
+        if (savedImageUri) {
+          setProfileImage({ uri: savedImageUri });
+        }
+      } catch (error) {
+        console.error("Failed to load profile image:", error);
+      }
+    };
+
+    loadProfileImage();
+
     if (route.params) {
       const { profileImage, fullName, email, contactNumber } = route.params;
       if (profileImage) setProfileImage(profileImage);
@@ -37,6 +53,50 @@ export default function MyProfile() {
       if (contactNumber) setContactNumber(contactNumber);
     }
   }, [route.params]);
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      const localUri = result.uri;
+      const filename = localUri.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename);
+      const type = match ? `image/${match[1]}` : `image`;
+
+      const formData = new FormData();
+      formData.append("photo", { uri: localUri, name: filename, type });
+
+      // Upload the image to the server
+      const response = await fetch("http://your-server-url/upload", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "content-type": "multipart/form-data",
+        },
+      });
+
+      const responseData = await response.json();
+      const serverUri = responseData.uri;
+
+      // Download the image to the local folder
+      const localPath = `${FileSystem.documentDirectory}${filename}`;
+      await FileSystem.downloadAsync(serverUri, localPath);
+
+      setProfileImage({ uri: localPath });
+
+      // Save the image URI to AsyncStorage
+      try {
+        await AsyncStorage.setItem("profileImage", localPath);
+      } catch (error) {
+        console.error("Failed to save profile image:", error);
+      }
+    }
+  };
 
   const productItems = useMemo(
     () =>
@@ -76,7 +136,9 @@ export default function MyProfile() {
             source={require("./assets/profile/profile_cover.jpg")}
             style={styles.profileBox}
           >
-            <Image source={profileImage} style={styles.profileImage} />
+            <TouchableOpacity onPress={pickImage}>
+              <Image source={profileImage} style={styles.profileImage} />
+            </TouchableOpacity>
           </ImageBackground>
           <View style={styles.profileNameContainer}>
             <Text style={styles.profileName}>{fullName}</Text>
@@ -95,15 +157,9 @@ export default function MyProfile() {
       ],
     },
     {
+      title: "Bio",
       data: [
         <View style={styles.bioContainer} key="bio">
-          <View style={styles.sectionHeader}>
-            <Image
-              source={require("./assets/bio_icon.png")}
-              style={styles.sectionIcon2}
-            />
-            <Text style={styles.sectionTitle}>Bio</Text>
-          </View>
           <View style={styles.bioItem}>
             <Image
               source={require("./assets/verified.png")}
@@ -196,7 +252,16 @@ export default function MyProfile() {
                       </View>
                     </View>
                   )}
-                  {title !== "Listings" && (
+                  {title === "Bio" && (
+                    <View style={styles.sectionHeader}>
+                      <Image
+                        source={require("./assets/bio_icon.png")}
+                        style={styles.sectionIcon2}
+                      />
+                      <Text style={styles.sectionTitle}>{title}</Text>
+                    </View>
+                  )}
+                  {title !== "Listings" && title !== "Bio" && (
                     <Text style={styles.sectionTitle}>{title}</Text>
                   )}
                 </View>
@@ -295,8 +360,8 @@ const styles = StyleSheet.create({
     borderColor: "#CDC684",
     borderWidth: 4,
     borderRadius: 100,
-    top: 50,
-    left: 40,
+    top: -50,
+    right: -10,
     zIndex: 1,
   },
   profileBox: {
@@ -312,6 +377,8 @@ const styles = StyleSheet.create({
     marginTop: 55,
     paddingHorizontal: 63,
     alignSelf: "flex-start",
+    top: -20,
+    left: 8,
   },
   profileName: {
     fontSize: 22,
@@ -331,9 +398,11 @@ const styles = StyleSheet.create({
   profileDescription: {
     fontSize: 15,
     alignSelf: "flex-start",
-    paddingHorizontal: 83,
+    paddingHorizontal: 90,
+    top: -25,
     fontWeight: "bold",
     color: "#4e56a0",
+    marginBottom: -10, // Adjusted to remove extra space
   },
   scrollViewContent: {
     paddingBottom: 90,
@@ -343,7 +412,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 15,
     marginHorizontal: 45,
-    marginVertical: 15,
+    marginVertical: 5, // Adjusted to remove extra space
   },
   bioItem: {
     flexDirection: "row",

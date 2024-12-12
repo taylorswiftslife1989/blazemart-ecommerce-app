@@ -28,7 +28,7 @@ export default function EditProfile() {
 
   useEffect(() => {
     const loadProfileImage = async () => {
-      const fileUri = `${FileSystem.documentDirectory}profile_picture/profile_image.png`;
+      const fileUri = `${FileSystem.documentDirectory}cache/profile_picture/current_profile.png`;
       const fileInfo = await FileSystem.getInfoAsync(fileUri);
       if (fileInfo.exists) {
         setProfileImage({ uri: fileUri });
@@ -40,16 +40,16 @@ export default function EditProfile() {
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaType,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 1,
     });
 
     if (!result.cancelled) {
-      const fileUri = `${FileSystem.documentDirectory}profile_picture/profile_image.png`;
+      const fileUri = `${FileSystem.documentDirectory}cache/profile_picture/current_profile.png`;
       await FileSystem.makeDirectoryAsync(
-        `${FileSystem.documentDirectory}profile_picture`,
+        `${FileSystem.documentDirectory}cache/profile_picture`,
         { intermediates: true }
       );
       await FileSystem.copyAsync({
@@ -61,7 +61,6 @@ export default function EditProfile() {
   };
 
   const handleSave = () => {
-    // Pass the updated information back to MyProfile.js
     navigation.navigate("MyProfile", {
       profileImage,
       fullName,
@@ -78,7 +77,6 @@ export default function EditProfile() {
           source={require("./assets/background.jpg")}
           style={styles.background}
         >
-          {/* Top Navigation */}
           <View style={styles.topNavigation}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
@@ -89,7 +87,6 @@ export default function EditProfile() {
             <Text style={styles.navTitle}>Edit Profile</Text>
           </View>
 
-          {/* Profile Cover */}
           <ImageBackground
             source={require("./assets/profile/profile_cover.jpg")}
             style={styles.profileCover}
@@ -101,7 +98,6 @@ export default function EditProfile() {
 
           <Text style={styles.updateProfileText}>Update Profile</Text>
 
-          {/* User Information Form */}
           <View style={styles.mainContainer}>
             <View style={styles.innerContainer}>
               <TextInput

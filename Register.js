@@ -10,6 +10,8 @@ import {
   ImageBackground,
   Platform,
   StatusBar,
+  View,
+  Image,
 } from "react-native";
 import * as DocumentPicker from "expo-document-picker";
 import { supabase } from "./supabase"; // Import your configured Supabase client
@@ -26,6 +28,8 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [corUri, setCorUri] = useState(null);
   const [corName, setCorName] = useState(null); // To display file name
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Fade-in effect
   React.useEffect(() => {
@@ -57,16 +61,30 @@ export default function Register() {
         const fileName = result.assets[0].name;
         setCorUri(fileUri);
         setCorName(fileName);
-        Alert.alert("File Selected", `COR file selected successfully:\n${fileName}`);
+        Alert.alert(
+          "File Selected",
+          `COR file selected successfully:\n${fileName}`
+        );
       }
     } catch (error) {
       console.error("Error selecting file:", error);
-      Alert.alert("Error", "An unexpected error occurred during file selection.");
+      Alert.alert(
+        "Error",
+        "An unexpected error occurred during file selection."
+      );
     }
   };
 
   const handleSignUp = async () => {
-    if (!fullname || !email || !studentId || !username || !password || !confirmPassword || !corUri) {
+    if (
+      !fullname ||
+      !email ||
+      !studentId ||
+      !username ||
+      !password ||
+      !confirmPassword ||
+      !corUri
+    ) {
       Alert.alert("Error", "All fields are required.");
       return;
     }
@@ -93,7 +111,8 @@ export default function Register() {
         return;
       }
 
-      const corUrl = supabase.storage.from("cor_bucket").getPublicUrl(fileName).data.publicUrl;
+      const corUrl = supabase.storage.from("cor_bucket").getPublicUrl(fileName)
+        .data.publicUrl;
 
       // Insert user data into the database
       const { data, error } = await supabase.from("users").insert([
@@ -178,24 +197,50 @@ export default function Register() {
           />
 
           <Text style={styles.label}>Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Required"
-            placeholderTextColor="#555"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Required"
+              placeholderTextColor="#555"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Image
+                source={
+                  showPassword
+                    ? require("./assets/hide_pass.png")
+                    : require("./assets/show_pass.png")
+                }
+                style={styles.showHideButton}
+              />
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.label}>Confirm Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Required"
-            placeholderTextColor="#555"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Required"
+              placeholderTextColor="#555"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <Image
+                source={
+                  showConfirmPassword
+                    ? require("./assets/hide_pass.png")
+                    : require("./assets/show_pass.png")
+                }
+                style={styles.showHideButton}
+              />
+            </TouchableOpacity>
+          </View>
 
           <Text style={styles.label}>COR (PDF)</Text>
           <TouchableOpacity
@@ -216,7 +261,8 @@ export default function Register() {
 
           <TouchableOpacity onPress={handleBackPress}>
             <Text style={styles.loginPrompt}>
-              Already have an account? <Text style={styles.loginText}>Back to login.</Text>
+              Already have an account?{" "}
+              <Text style={styles.loginText}>Back to login.</Text>
             </Text>
           </TouchableOpacity>
         </Animated.View>
@@ -282,6 +328,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
     borderColor: "#4E56A0",
     borderWidth: 2,
+  },
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    width: "90%",
+  },
+  showHideButton: {
+    width: 30,
+    height: 30,
+    marginLeft: 15,
   },
   uploadButton: {
     width: "75%",
