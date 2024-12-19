@@ -43,6 +43,15 @@ export default function Home() {
                 placeholder="Search Products..."
                 placeholderTextColor="#000"
               />
+              <TouchableOpacity
+                style={styles.goIconContainer}
+                onPress={() => navigation.navigate("SearchResult")}
+              >
+                <Image
+                  source={require("./assets/home/go.png")}
+                  style={styles.goIcon}
+                />
+              </TouchableOpacity>
             </View>
             <View style={styles.topIcons}>
               <TouchableOpacity
@@ -205,6 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 10,
     paddingLeft: 50, // Add padding to the left for the icon
+    paddingRight: 50, // Add padding to the right for the go icon
     position: "relative",
     zIndex: 1, // Ensure the search bar is below the icon
   },
@@ -221,6 +231,21 @@ const styles = StyleSheet.create({
   searchIcon: {
     width: 20,
     height: 20,
+  },
+  goIconContainer: {
+    position: "absolute",
+    height: "100%",
+    width: 45, // Adjust width as needed
+    right: 0,
+    //The background color should be transparent
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    zIndex: 2, // Ensure the icon is above the search bar
+  },
+  goIcon: {
+    width: 35,
+    height: 35,
   },
   topIcons: {
     flexDirection: "row",

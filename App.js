@@ -27,6 +27,7 @@ import Notification from "./Notification";
 import ProductSelectedHome from "./ProductSelectedHome";
 import MyProfile from "./MyProfile";
 import EditProfile from "./Editprofile";
+import SearchResult from "./Searchresult";
 
 const Stack = createStackNavigator();
 
@@ -99,6 +100,7 @@ export default function App() {
         />
         <Stack.Screen name="MyProfile" component={MyProfile} />
         <Stack.Screen name="EditProfile" component={EditProfile} />
+        <Stack.Screen name="SearchResult" component={SearchResult} />
       </Stack.Navigator>
     </NavigationContainer>
   );

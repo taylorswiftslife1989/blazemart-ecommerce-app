@@ -6,13 +6,34 @@ import {
   Image,
   ImageBackground,
   StyleSheet,
+  FlatList,
+  Dimensions,
 } from "react-native";
 import { useRoute, useNavigation } from "@react-navigation/native";
+
+const { width } = Dimensions.get("window");
 
 const CategoryPage = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { category } = route.params;
+
+  const productItems = Array.from({ length: 30 }, (_, i) => ({
+    id: i.toString(),
+    title: `Product ${i + 1}`,
+    price: `₱${(i + 1) * 100}`,
+  }));
+
+  const renderItem = ({ item }) => (
+    <View style={styles.productContainer}>
+      <Image
+        source={require("./assets/marketplace/sample_product.jpg")}
+        style={styles.productImage}
+      />
+      <Text style={styles.productTitle}>{item.title}</Text>
+      <Text style={styles.productPrice}>{item.price}</Text>
+    </View>
+  );
 
   return (
     <ImageBackground
@@ -41,6 +62,15 @@ const CategoryPage = () => {
             {`Search Result by\nCategory "${category}"`}
           </Text>
         </View>
+
+        {/* Product List */}
+        <FlatList
+          data={productItems}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.productList}
+        />
       </View>
     </ImageBackground>
   );
@@ -93,5 +123,34 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "bold",
     textAlign: "left",
+  },
+  productList: {
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+  },
+  productContainer: {
+    flex: 1,
+    margin: 5,
+    backgroundColor: "#FFF",
+    borderRadius: 10,
+    padding: 10,
+    alignItems: "center",
+    width: (width - 40) / 2, // Adjust width for 2 columns
+  },
+  productImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 10,
+  },
+  productTitle: {
+    marginTop: 5,
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#4E56A0",
+  },
+  productPrice: {
+    marginTop: 5,
+    fontSize: 14,
+    color: "#4E56A0",
   },
 });
